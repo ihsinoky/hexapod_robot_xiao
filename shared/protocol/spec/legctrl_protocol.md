@@ -189,7 +189,7 @@ Offset | Size | Field          | Description
 
 ## 4. テレメトリ（Telemetry）
 
-ファームウェアは定期的に（推奨 10 Hz）テレメトリデータを Notify で送信します。
+ファームウェアはテレメトリデータを **10 Hz（100 ms 周期）±10% の周期で必ず** Notify 送信しなければなりません（デッドマン監視用の `last_cmd_age_ms` はこの周期を前提とする）。
 
 ### 4.1 TELEMETRY (0x10)
 

@@ -21,4 +21,7 @@ config:
   MD033: false
 
   # MD041: First line in file should be a top-level heading
+  # Disabled because many project Markdown files start with front matter or other non-heading
+  # content (for example, metadata blocks or badges), so enforcing this rule would produce
+  # excessive noise without improving readability in this codebase.
   MD041: false

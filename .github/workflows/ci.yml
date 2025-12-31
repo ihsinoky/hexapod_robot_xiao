@@ -80,6 +80,14 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Cache Zephyr SDK
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        id: cache-zephyr-sdk
+        uses: actions/cache@v4
+        with:
+          path: zephyr-sdk-${{ env.ZEPHYR_SDK_VERSION }}
+          key: zephyr-sdk-${{ env.ZEPHYR_SDK_VERSION }}-${{ runner.os }}
+
       - name: Install dependencies
         if: steps.check_firmware.outputs.firmware_exists == 'true'
         run: |
@@ -87,7 +95,7 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install Zephyr SDK
-        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        if: steps.check_firmware.outputs.firmware_exists == 'true' && steps.cache-zephyr-sdk.outputs.cache-hit != 'true'
         run: |
           SDK_FILE=zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64.tar.xz
           SDK_DIR=zephyr-sdk-${ZEPHYR_SDK_VERSION}
@@ -102,11 +110,39 @@ jobs:
           # Install SDK with all toolchains (-t all), host tools (-h), and CMake (-c)
           ./setup.sh -t all -h -c
 
+      - name: Setup Zephyr SDK environment
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        run: |
+          export ZEPHYR_SDK_INSTALL_DIR="${PWD}/zephyr-sdk-${ZEPHYR_SDK_VERSION}"
+          echo "ZEPHYR_SDK_INSTALL_DIR=${ZEPHYR_SDK_INSTALL_DIR}" >> $GITHUB_ENV
+
+      - name: Cache West modules
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            zephyr
+            modules
+            tools
+            bootloader
+          key: west-modules-${{ hashFiles('hexapod_robot_xiao/firmware/zephyr/west.yml') }}
+          restore-keys: |
+            west-modules-
+
       - name: Initialize West workspace
         if: steps.check_firmware.outputs.firmware_exists == 'true'
         run: |
-          west init -l hexapod_robot_xiao/firmware/zephyr
-          west update -o=--depth=1 -n
+          set -e
+          echo "Initializing West workspace..."
+          if ! west init -l hexapod_robot_xiao/firmware/zephyr; then
+            echo "Error: 'west init' failed. Check network connectivity and the local Zephyr project path." >&2
+            exit 1
+          fi
+          echo "Updating West modules..."
+          if ! west update -o=--depth=1 -n; then
+            echo "Error: 'west update' failed. Check network connectivity and the West manifest configuration." >&2
+            exit 1
+          fi
 
       - name: Install Zephyr Python dependencies
         if: steps.check_firmware.outputs.firmware_exists == 'true'

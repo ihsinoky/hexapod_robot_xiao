@@ -8,7 +8,7 @@
 
 1. **Markdown Lint**: すべての Markdown ファイルの品質チェック
 2. **YAML Lint**: すべての YAML ファイルの品質チェック
-3. **Zephyr Firmware Build**: `firmware/zephyr/app/legctrl_fw/` が存在する場合、xiao_ble ボード向けのビルド確認
+3. **Zephyr Firmware Build**: `firmware/zephyr/app/legctrl_fw/` が存在する場合、xiao_nrf52840 ボード向けのビルド確認
 
 ## CI ワークフロー
 
@@ -35,9 +35,9 @@ CI は以下の場合に自動実行されます：
 
 #### 3. Zephyr Firmware Build (`zephyr-build`)
 
-- **ボード**: xiao_ble (XIAO nRF52840)
+- **ボード**: xiao_nrf52840 (XIAO nRF52840)
 - **対象**: `firmware/zephyr/app/legctrl_fw/`
-- **ビルドコマンド**: `west build -b xiao_ble app/legctrl_fw`
+- **ビルドコマンド**: `west build -b xiao_nrf52840 app/legctrl_fw`
 - **条件**: ファームウェアディレクトリが存在する場合のみ実行
 
 ビルド成果物（`zephyr.*` ファイル）は GitHub Actions のアーティファクトとして 7 日間保存されます。
@@ -173,13 +173,11 @@ markdownlint-cli2 README.md
    - 依存関係や設定ファイルの確認
    - [build_flash.md](./build_flash.md) の手順に従っているか確認
 
-### CI の実行をスキップする
+### Draft PR での作業
 
-緊急の場合やドラフト PR の場合、コミットメッセージに `[skip ci]` を含めることで CI をスキップできます。
+CI を実行せずに作業を進めたい場合は、**Draft Pull Request** として PR を作成することを推奨します。
 
-```bash
-git commit -m "Draft: WIP changes [skip ci]"
-```
+Draft PR の場合、必要に応じて CI の実行を制御でき、レビュー準備が整った時点で "Ready for review" に変更できます。
 
 **注意**: `main` ブランチへのマージ前には必ず CI を通すこと。
 

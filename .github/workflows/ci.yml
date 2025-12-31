@@ -12,7 +12,6 @@ on:
 
 permissions:
   contents: read
-  actions: write  # Required for upload-artifact
 
 jobs:
   markdown-lint:
@@ -28,7 +27,7 @@ jobs:
           node-version: '20'
 
       - name: Install markdownlint-cli2
-        run: npm install -g markdownlint-cli2
+        run: npm install -g markdownlint-cli2@0.15.0
 
       - name: Run markdownlint
         run: markdownlint-cli2 "**/*.md"
@@ -46,7 +45,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install yamllint
-        run: pip install yamllint
+        run: pip install yamllint==1.35.1
 
       - name: Run yamllint
         run: yamllint .
@@ -84,7 +83,7 @@ jobs:
       - name: Install dependencies
         if: steps.check_firmware.outputs.firmware_exists == 'true'
         run: |
-          pip3 install --user -U west
+          pip3 install --user -U west==1.2.0
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install Zephyr SDK
@@ -100,6 +99,7 @@ jobs:
             shasum --check --ignore-missing
           tar xvf ${SDK_FILE}
           cd ${SDK_DIR}
+          # Install SDK with all toolchains (-t all), host tools (-h), and CMake (-c)
           ./setup.sh -t all -h -c
 
       - name: Initialize West workspace
@@ -117,7 +117,7 @@ jobs:
         if: steps.check_firmware.outputs.firmware_exists == 'true'
         run: |
           cd hexapod_robot_xiao/firmware/zephyr
-          west build -b xiao_ble app/legctrl_fw
+          west build -b xiao_nrf52840 app/legctrl_fw
 
       - name: Upload build artifacts
         if: steps.check_firmware.outputs.firmware_exists == 'true'

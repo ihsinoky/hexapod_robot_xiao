@@ -261,7 +261,7 @@ Offset | Size | Field            | Description
 ### 5.3 動作シーケンス
 1. ARMED 状態で有効コマンドを受信 → タイマーリセット
 2. 200 ms 間、有効コマンドが届かない → FAULT 状態へ遷移
-3. サーボ出力停止（または中立位置へ移動）
+3. サーボ出力停止（PWM出力を完全停止し、サーボは保持動作を行わない）
 4. テレメトリで `state = FAULT`, `error_code = ERR_DEADMAN_TIMEOUT` を送信
 5. 復帰: CMD_DISARM → CMD_ARM
 

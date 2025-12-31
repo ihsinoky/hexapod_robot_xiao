@@ -270,7 +270,10 @@ Offset | Size | Field            | Description
 ### 5.1 基本動作
 「最終有効コマンド」からの経過時間が閾値を超えた場合、ファームウェアは自動的に FAULT 状態へ遷移し、サーボ出力を停止します。
 
-**最終有効コマンド**: CMD_ARM, CMD_SET_SERVO_CH0, CMD_PING のいずれか
+**最終有効コマンド**:
+- DISARMED / FAULT 状態から ARMED 状態へ遷移させる `CMD_ARM`（状態遷移が発生したときのみ）
+- ARMED 状態で受信した `CMD_SET_SERVO_CH0`
+- ARMED 状態で受信した `CMD_PING`
 
 ### 5.2 タイムアウト閾値
 **デフォルト値**: **200 ms**

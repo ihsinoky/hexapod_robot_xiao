@@ -1,0 +1,23 @@
+# West manifest file for LegCtrl firmware
+# This file defines dependencies for Zephyr RTOS project
+#
+# Usage:
+#   mkdir workspace && cd workspace
+#   west init -l /path/to/hexapod_robot_xiao/firmware/zephyr
+#   west update
+#
+# For more information, see docs/build_flash.md
+
+manifest:
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+
+  projects:
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: v3.6-branch
+      import: true
+
+  self:
+    path: firmware/zephyr

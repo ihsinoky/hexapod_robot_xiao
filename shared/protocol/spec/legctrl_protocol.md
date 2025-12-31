@@ -161,7 +161,7 @@ Offset | Size | Field          | Description
 
 **動作**:
 - ARMED 状態の場合: pulse_us の値をサーボに出力
-- DISARMED/FAULT 状態の場合: コマンドは無視される（テレメトリで状態確認可能）
+- DISARMED/FAULT 状態の場合: コマンドは無視される。FW はこの操作に対して追加のテレメトリ送信や `error_code` の更新は行わない。iOS 側は別途 STATE テレメトリ（例: armed 状態やエラー状態）から、当該コマンドが無効状態で送信され適用されなかったことを判断する。
 
 ---
 

@@ -1,0 +1,119 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  markdown-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdownlint-cli2
+        run: npm install -g markdownlint-cli2
+
+      - name: Run markdownlint
+        run: markdownlint-cli2 "**/*.md"
+
+  yaml-lint:
+    name: YAML Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Run yamllint
+        run: yamllint .
+
+  zephyr-build:
+    name: Zephyr Firmware Build
+    runs-on: ubuntu-latest
+    # Only run if the firmware directory exists
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          path: hexapod_robot_xiao
+
+      - name: Check if firmware exists
+        id: check_firmware
+        run: |
+          if [ -d "hexapod_robot_xiao/firmware/zephyr/app/legctrl_fw" ]; then
+            echo "firmware_exists=true" >> $GITHUB_OUTPUT
+            echo "Firmware directory found"
+          else
+            echo "firmware_exists=false" >> $GITHUB_OUTPUT
+            echo "Firmware directory not found, skipping build"
+          fi
+
+      - name: Setup Python
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        run: |
+          pip3 install --user -U west
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install Zephyr SDK
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        run: |
+          SDK_VERSION=v0.16.5-1
+          SDK_FILE=zephyr-sdk-0.16.5-1_linux-x86_64.tar.xz
+          wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/${SDK_VERSION}/${SDK_FILE}
+          wget -O - https://github.com/zephyrproject-rtos/sdk-ng/releases/download/${SDK_VERSION}/sha256.sum | \
+            shasum --check --ignore-missing
+          tar xvf ${SDK_FILE}
+          cd zephyr-sdk-0.16.5-1
+          ./setup.sh -t all -h -c
+
+      - name: Initialize West workspace
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        run: |
+          west init -l hexapod_robot_xiao/firmware/zephyr
+          west update -o=--depth=1 -n
+
+      - name: Install Zephyr Python dependencies
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        run: |
+          pip3 install --user -r zephyr/scripts/requirements.txt
+
+      - name: Build firmware
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        run: |
+          cd hexapod_robot_xiao/firmware/zephyr
+          west build -b xiao_ble app/legctrl_fw
+
+      - name: Upload build artifacts
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-build
+          path: hexapod_robot_xiao/firmware/zephyr/build/zephyr/zephyr.*
+          retention-days: 7

@@ -103,27 +103,56 @@ CI を `main` ブランチへのマージ条件として強制するには、Git
 
 ## Linter の設定カスタマイズ
 
-### Markdown Lint
+### Markdown Lint の設定
 
 `.markdownlint-cli2.yaml` を編集して、ルールをカスタマイズできます。
 
 主な設定項目：
+
 - `MD013`: 行の長さ制限（デフォルト: 120 文字）
 - `MD033`: インライン HTML の許可/禁止
 - `MD041`: ファイル先頭の見出し要求
 
 詳細: [markdownlint ルール一覧](https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md)
 
-### YAML Lint
+### YAML Lint の設定
 
 `.yamllint.yaml` を編集して、ルールをカスタマイズできます。
 
 主な設定項目：
+
 - `line-length`: 行の長さ制限（デフォルト: 120 文字）
 - `truthy`: 真偽値の形式（yes/no, true/false など）
 - `indentation`: インデント幅（デフォルト: 2 スペース）
 
 詳細: [yamllint ルール一覧](https://yamllint.readthedocs.io/en/stable/rules.html)
+
+## 既存ファイルの Lint エラーについて
+
+**注意**: CI 導入時点で、既存のドキュメントファイルに多数の lint エラーが存在します。
+
+これらのエラーは主に：
+
+- 見出しの前後の空行不足
+- リストの前後の空行不足
+- コードブロックの言語指定なし
+- 行末の空白
+
+などの軽微なフォーマット問題です。これらは段階的に修正することを推奨します：
+
+1. 新規ファイルや大きな変更を行う際に、該当ファイルの lint エラーを修正
+2. 別途、lint エラー修正専用の PR を作成
+3. `.markdownlint-cli2.yaml` でルールを調整（推奨しない）
+
+**ローカルでのエラー確認**:
+
+```bash
+# すべての Markdown ファイルをチェック
+markdownlint-cli2 "**/*.md"
+
+# 特定のファイルのみチェック
+markdownlint-cli2 README.md
+```
 
 ## トラブルシューティング
 

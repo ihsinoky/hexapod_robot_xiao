@@ -18,9 +18,14 @@ XIAO nRF52840 向けのファームウェア（Zephyr RTOS使用）
 アプリケーションコードは `firmware/zephyr/app/legctrl_fw/` に配置されています。
 
 ## ビルド方法
+
+### 初回セットアップ
 詳細な手順は [`docs/build_flash.md`](../../docs/build_flash.md) を参照してください。
 
-**クイックスタート**（Zephyr環境セットアップ済みの場合）:
+### クイックスタート
+環境構築済みの場合は [`docs/quick_start.md`](../../docs/quick_start.md) を参照してください。
+
+**最小コマンド**:
 ```bash
 cd firmware/zephyr/app/legctrl_fw
 west build -b xiao_nrf52840 .

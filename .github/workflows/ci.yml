@@ -60,6 +60,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          # Checkout to subdirectory to match west workspace structure
+          # West expects the application to be in a subdirectory when initializing workspace
           path: hexapod_robot_xiao
 
       - name: Check if firmware exists
@@ -90,8 +92,11 @@ jobs:
         run: |
           SDK_FILE=zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64.tar.xz
           SDK_DIR=zephyr-sdk-${ZEPHYR_SDK_VERSION}
-          wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/${SDK_FILE}
-          wget -O - https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/sha256.sum | \
+          # Download SDK with retry logic to handle transient network failures
+          wget --tries=3 --waitretry=5 \
+            https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/${SDK_FILE}
+          wget --tries=3 --waitretry=5 -O - \
+            https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/sha256.sum | \
             shasum --check --ignore-missing
           tar xvf ${SDK_FILE}
           cd ${SDK_DIR}

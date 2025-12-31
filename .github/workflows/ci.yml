@@ -160,5 +160,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: firmware-build
-          path: hexapod_robot_xiao/firmware/zephyr/build/zephyr/zephyr.*
+          path: |
+            hexapod_robot_xiao/firmware/zephyr/build/zephyr/zephyr.elf
+            hexapod_robot_xiao/firmware/zephyr/build/zephyr/zephyr.hex
+            hexapod_robot_xiao/firmware/zephyr/build/zephyr/zephyr.bin
+            hexapod_robot_xiao/firmware/zephyr/build/zephyr/zephyr.dts
           retention-days: 7

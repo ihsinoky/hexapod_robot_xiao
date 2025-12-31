@@ -371,7 +371,7 @@ FW → iOS (Telemetry):
 
 **nRF Connect / LightBlue 等を使用**:
 
-1. **Service UUID を見つける** (ファームウェア実装依存、例: `12345678-1234-1234-1234-123456789abc`)
+1. **プロトコルで定義された Service UUID を選択する**（正式な Service/Characteristic UUID は本仕様および `docs/ble_protocol.md` を参照。以下はスキャナ画面上での表示例: `12345678-1234-1234-1234-123456789abc`）
 2. **Command Characteristic (Write)** を開く
 3. **ARM コマンド送信**:
    - 値: `01 01 00 00` (Hex)

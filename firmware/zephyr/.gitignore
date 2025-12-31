@@ -1,0 +1,29 @@
+# Zephyr build artifacts
+build/
+build-*/
+
+# West workspace dependencies (if using in-repo workspace)
+zephyr/
+modules/
+tools/
+bootloader/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# macOS
+.DS_Store
+
+# Temporary files
+*.orig
+*.log

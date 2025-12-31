@@ -14,7 +14,15 @@ XIAO nRF52840 向けのファームウェア（Zephyr RTOS使用）
 - west（Zephyrのメタツール）
 
 ## 状態
-現在準備中。アプリケーションコードは `firmware/zephyr/app/legctrl_fw/` に配置予定。
+**✅ 最小アプリケーション構築済み**  
+アプリケーションコードは `firmware/zephyr/app/legctrl_fw/` に配置されています。
 
 ## ビルド方法
-詳細はルートREADMEの「ビルド & フラッシュ（ファームウェア）」セクションを参照してください。
+詳細な手順は [`docs/build_flash.md`](../../docs/build_flash.md) を参照してください。
+
+**クイックスタート**（Zephyr環境セットアップ済みの場合）:
+```bash
+cd firmware/zephyr/app/legctrl_fw
+west build -b xiao_nrf52840 .
+west flash --runner uf2
+```

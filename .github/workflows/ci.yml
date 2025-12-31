@@ -50,8 +50,8 @@ jobs:
   zephyr-build:
     name: Zephyr Firmware Build
     runs-on: ubuntu-latest
-    # Only run if the firmware directory exists
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    env:
+      ZEPHYR_SDK_VERSION: "0.16.5-1"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -84,13 +84,13 @@ jobs:
       - name: Install Zephyr SDK
         if: steps.check_firmware.outputs.firmware_exists == 'true'
         run: |
-          SDK_VERSION=v0.16.5-1
-          SDK_FILE=zephyr-sdk-0.16.5-1_linux-x86_64.tar.xz
-          wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/${SDK_VERSION}/${SDK_FILE}
-          wget -O - https://github.com/zephyrproject-rtos/sdk-ng/releases/download/${SDK_VERSION}/sha256.sum | \
+          SDK_FILE=zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64.tar.xz
+          SDK_DIR=zephyr-sdk-${ZEPHYR_SDK_VERSION}
+          wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/${SDK_FILE}
+          wget -O - https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/sha256.sum | \
             shasum --check --ignore-missing
           tar xvf ${SDK_FILE}
-          cd zephyr-sdk-0.16.5-1
+          cd ${SDK_DIR}
           ./setup.sh -t all -h -c
 
       - name: Initialize West workspace

@@ -135,10 +135,8 @@ jobs:
         run: |
           set -e
           echo "Initializing West workspace..."
-          # Create workspace structure: the checked-out repo becomes firmware/zephyr
-          # We need to move it to match west.yml self.path
-          mkdir -p firmware
-          mv $(ls -A | grep -v firmware) firmware/zephyr/ 2>/dev/null || true
+          # West.yml specifies self.path as "firmware/zephyr"
+          # We checked out to the default location, so we can directly use firmware/zephyr
           if ! west init -l firmware/zephyr; then
             echo "Error: 'west init' failed. Check network connectivity and the local Zephyr project path." >&2
             exit 1
@@ -157,7 +155,7 @@ jobs:
       - name: Build firmware
         if: steps.check_firmware.outputs.firmware_exists == 'true'
         run: |
-          west build -b xiao_nrf52840 firmware/zephyr/app/legctrl_fw
+          west build -b xiao_nrf52840 app/legctrl_fw
 
       - name: Upload build artifacts
         if: steps.check_firmware.outputs.firmware_exists == 'true'

@@ -61,15 +61,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          # Checkout to subdirectory to match west workspace structure
-          # West expects the application to be in a subdirectory when initializing workspace
-          path: hexapod_robot_xiao
+        # Repository is checked out to default location
+        # West workspace will be initialized with correct structure
 
       - name: Check if firmware exists
         id: check_firmware
         run: |
-          if [ -d "hexapod_robot_xiao/firmware/zephyr/app/legctrl_fw" ]; then
+          if [ -d "firmware/zephyr/app/legctrl_fw" ]; then
             echo "firmware_exists=true" >> $GITHUB_OUTPUT
             echo "Firmware directory found"
           else
@@ -128,21 +126,23 @@ jobs:
             modules
             tools
             bootloader
-          key: west-modules-${{ hashFiles('hexapod_robot_xiao/firmware/zephyr/west.yml') }}
+          key: west-modules-${{ hashFiles('firmware/zephyr/west.yml') }}
           restore-keys: |
             west-modules-
 
       - name: Initialize West workspace
         if: steps.check_firmware.outputs.firmware_exists == 'true'
-        working-directory: hexapod_robot_xiao
         run: |
           set -e
           echo "Initializing West workspace..."
+          # Create workspace structure: the checked-out repo becomes firmware/zephyr
+          # We need to move it to match west.yml self.path
+          mkdir -p firmware
+          mv $(ls -A | grep -v firmware) firmware/zephyr/ 2>/dev/null || true
           if ! west init -l firmware/zephyr; then
             echo "Error: 'west init' failed. Check network connectivity and the local Zephyr project path." >&2
             exit 1
           fi
-          cd ..
           echo "Updating West modules..."
           if ! west update -o=--depth=1 -n; then
             echo "Error: 'west update' failed. Check network connectivity and the West manifest configuration." >&2
@@ -157,8 +157,7 @@ jobs:
       - name: Build firmware
         if: steps.check_firmware.outputs.firmware_exists == 'true'
         run: |
-          cd hexapod_robot_xiao/firmware/zephyr
-          west build -b xiao_nrf52840 app/legctrl_fw
+          west build -b xiao_nrf52840 firmware/zephyr/app/legctrl_fw
 
       - name: Upload build artifacts
         if: steps.check_firmware.outputs.firmware_exists == 'true'
@@ -166,10 +165,10 @@ jobs:
         with:
           name: firmware-build
           path: |
-            hexapod_robot_xiao/firmware/zephyr/build/zephyr/zephyr.elf
-            hexapod_robot_xiao/firmware/zephyr/build/zephyr/zephyr.hex
-            hexapod_robot_xiao/firmware/zephyr/build/zephyr/zephyr.bin
-            hexapod_robot_xiao/firmware/zephyr/build/zephyr/zephyr.dts
+            build/zephyr/zephyr.elf
+            build/zephyr/zephyr.hex
+            build/zephyr/zephyr.bin
+            build/zephyr/zephyr.dts
           retention-days: 7
 
       - name: Build summary

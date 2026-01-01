@@ -166,3 +166,12 @@ jobs:
             hexapod_robot_xiao/firmware/zephyr/build/zephyr/zephyr.bin
             hexapod_robot_xiao/firmware/zephyr/build/zephyr/zephyr.dts
           retention-days: 7
+
+      - name: Build summary
+        if: always()
+        run: |
+          if [ "${{ steps.check_firmware.outputs.firmware_exists }}" = "true" ]; then
+            echo "✅ Firmware build completed successfully"
+          else
+            echo "ℹ️ Firmware directory not found - build skipped (this is expected if firmware hasn't been added yet)"
+          fi

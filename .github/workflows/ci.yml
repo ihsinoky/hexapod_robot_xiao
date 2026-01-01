@@ -135,12 +135,14 @@ jobs:
         run: |
           set -e
           echo "Initializing West workspace..."
-          # West.yml specifies self.path as "firmware/zephyr"
-          # We checked out to the default location, so we can directly use firmware/zephyr
-          if ! west init -l firmware/zephyr; then
+          # Create .west in repo root by specifying firmware as manifest repo
+          # and zephyr/west.yml as the manifest file location within it
+          if ! west init -l --mf zephyr/west.yml firmware; then
             echo "Error: 'west init' failed. Check network connectivity and the local Zephyr project path." >&2
             exit 1
           fi
+          echo "West workspace topology:"
+          west topdir
           echo "Updating West modules..."
           if ! west update -o=--depth=1 -n; then
             echo "Error: 'west update' failed. Check network connectivity and the West manifest configuration." >&2

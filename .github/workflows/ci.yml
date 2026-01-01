@@ -155,7 +155,7 @@ jobs:
       - name: Build firmware
         if: steps.check_firmware.outputs.firmware_exists == 'true'
         run: |
-          west build -b xiao_nrf52840 app/legctrl_fw
+          west build -b xiao_nrf52840 firmware/zephyr/app/legctrl_fw
 
       - name: Upload build artifacts
         if: steps.check_firmware.outputs.firmware_exists == 'true'

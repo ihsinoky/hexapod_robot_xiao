@@ -8,7 +8,7 @@
 
 1. **Markdown Lint**: すべての Markdown ファイルの品質チェック
 2. **YAML Lint**: すべての YAML ファイルの品質チェック
-3. **Zephyr Firmware Build**: `firmware/zephyr/app/legctrl_fw/` が存在する場合、xiao_nrf52840 ボード向けのビルド確認
+3. **Zephyr Firmware Build**: `firmware/zephyr/app/legctrl_fw/` が存在する場合、xiao_ble ボード向けのビルド確認
 
 ## CI ワークフロー
 
@@ -35,9 +35,9 @@ CI は以下の場合に自動実行されます：
 
 #### 3. Zephyr Firmware Build (`zephyr-build`)
 
-- **ボード**: xiao_nrf52840 (XIAO nRF52840)
+- **ボード**: xiao_ble (XIAO nRF52840)
 - **対象**: `firmware/zephyr/app/legctrl_fw/`
-- **ビルドコマンド**: `west build -b xiao_nrf52840 app/legctrl_fw`
+- **ビルドコマンド**: `west build -b xiao_ble -s firmware/zephyr/app/legctrl_fw`
 - **条件**: ファームウェアディレクトリが存在する場合のみ実行
 
 ビルド成果物（`zephyr.*` ファイル）は GitHub Actions のアーティファクトとして 7 日間保存されます。

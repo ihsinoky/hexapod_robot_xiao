@@ -58,6 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ZEPHYR_SDK_VERSION: "0.16.5-1"
+      BOARD: xiao_ble
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -133,7 +134,7 @@ jobs:
       - name: Initialize West workspace
         if: steps.check_firmware.outputs.firmware_exists == 'true'
         run: |
-          set -e
+          set -euxo pipefail
           echo "Initializing West workspace..."
           # Create .west in repo root by specifying firmware as manifest repo
           # and zephyr/west.yml as the manifest file location within it
@@ -148,6 +149,10 @@ jobs:
             echo "Error: 'west update' failed. Check network connectivity and the West manifest configuration." >&2
             exit 1
           fi
+          echo "Verifying board availability:"
+          west boards | grep -i xiao || echo "Warning: No xiao boards found in list"
+          echo "West workspace status:"
+          west list
 
       - name: Install Zephyr Python dependencies
         if: steps.check_firmware.outputs.firmware_exists == 'true'
@@ -157,10 +162,18 @@ jobs:
       - name: Build firmware
         if: steps.check_firmware.outputs.firmware_exists == 'true'
         run: |
+          set -euxo pipefail
           # Build from application directory.
           # After 'west init -l --mf zephyr/west.yml firmware', the manifest repo is 'firmware/'
           # and the app is at firmware/zephyr/app/legctrl_fw, so we use the path relative to workspace root
-          west build -b xiao_nrf52840 -s firmware/zephyr/app/legctrl_fw
+          # Using xiao_ble as the official Zephyr board name for XIAO nRF52840
+          west build -b ${BOARD} -s firmware/zephyr/app/legctrl_fw || {
+            echo "Build failed. Dumping CMake logs..."
+            [ -f build/CMakeFiles/CMakeError.log ] && cat build/CMakeFiles/CMakeError.log || echo "No CMakeError.log found"
+            [ -f build/CMakeFiles/CMakeOutput.log ] && head -n 50 build/CMakeFiles/CMakeOutput.log || echo "No CMakeOutput.log found"
+            [ -f build/zephyr/.config ] && head -n 30 build/zephyr/.config || echo "No .config found"
+            exit 1
+          }
 
       - name: Upload build artifacts
         if: steps.check_firmware.outputs.firmware_exists == 'true'

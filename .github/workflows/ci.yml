@@ -157,7 +157,10 @@ jobs:
       - name: Build firmware
         if: steps.check_firmware.outputs.firmware_exists == 'true'
         run: |
-          west build -b xiao_nrf52840 firmware/zephyr/app/legctrl_fw
+          # Build from application directory.
+          # After 'west init -l --mf zephyr/west.yml firmware', the manifest repo is 'firmware/'
+          # and the app is at firmware/zephyr/app/legctrl_fw, so we use the path relative to workspace root
+          west build -b xiao_nrf52840 -s firmware/zephyr/app/legctrl_fw
 
       - name: Upload build artifacts
         if: steps.check_firmware.outputs.firmware_exists == 'true'

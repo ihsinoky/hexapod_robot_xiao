@@ -1,0 +1,35 @@
+# Build artifacts
+build/
+*.o
+*.elf
+*.hex
+*.bin
+*.uf2
+*.map
+
+# Zephyr specific
+.west/
+modules/
+tools/
+bootloader/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log

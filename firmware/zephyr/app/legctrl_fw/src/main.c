@@ -11,6 +11,8 @@
 #include <zephyr/drivers/pwm.h>
 #include <zephyr/device.h>
 
+#include "ble_service.h"
+
 LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
 /* PCA9685 PWM device */
@@ -28,6 +30,25 @@ LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
 /* Servo channel 0 */
 #define SERVO_CHANNEL_0        0
+
+/* Telemetry timer period (10 Hz = 100 ms) */
+#define TELEMETRY_PERIOD_MS    100
+
+/* Telemetry timer */
+static void telemetry_timer_handler(struct k_timer *timer);
+K_TIMER_DEFINE(telemetry_timer, telemetry_timer_handler, NULL);
+
+/* Telemetry timer handler */
+static void telemetry_timer_handler(struct k_timer *timer)
+{
+	ARG_UNUSED(timer);
+	
+	/* Update deadman timer */
+	ble_service_update_deadman();
+	
+	/* Send telemetry */
+	ble_service_send_telemetry();
+}
 
 int main(void)
 {
@@ -71,12 +92,30 @@ int main(void)
 	LOG_INF("  - PWM frequency: 50Hz (period: 20ms)");
 	LOG_INF("  - Pulse width: 1500us (center position)");
 	LOG_INF("  - Safe range: 1000-2000us");
+	
+	/* Initialize BLE service */
+	ret = ble_service_init();
+	if (ret) {
+		LOG_ERR("BLE service initialization failed: %d", ret);
+		return -1;
+	}
+	
+	LOG_INF("BLE service initialized");
+	
+	/* Start telemetry timer (10 Hz) */
+	k_timer_start(&telemetry_timer, K_MSEC(TELEMETRY_PERIOD_MS), 
+		      K_MSEC(TELEMETRY_PERIOD_MS));
+	LOG_INF("Telemetry timer started (10 Hz)");
+	
 	LOG_INF("System started successfully");
 	LOG_INF("===========================================");
 
 	/* Main loop */
 	while (1) {
 		k_sleep(K_SECONDS(5));
-		LOG_INF("Heartbeat: Servo active at center position");
+		LOG_INF("Heartbeat: State=%u, Error=%u, LastCmdAge=%u ms",
+			ble_service_get_state(),
+			ble_service_get_error_code(),
+			ble_service_get_last_cmd_age_ms());
 	}
 }

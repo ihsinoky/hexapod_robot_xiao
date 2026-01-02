@@ -24,7 +24,8 @@
 		
 		/* PWM configuration for servo control
 		 * Frequency: 50Hz (20ms period) for standard servos
+		 * #pwm-cells: <2> per Zephyr binding (channel, period)
 		 */
-		#pwm-cells = <3>;
+		#pwm-cells = <2>;
 	};
 };

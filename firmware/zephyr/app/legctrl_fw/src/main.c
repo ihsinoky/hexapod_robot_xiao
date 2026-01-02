@@ -79,6 +79,4 @@ int main(void)
 		k_sleep(K_SECONDS(5));
 		LOG_INF("Heartbeat: Servo active at center position");
 	}
-
-	return 0;
 }

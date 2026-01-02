@@ -155,6 +155,13 @@ static ssize_t cmd_write(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 		return BT_GATT_ERR(BT_ATT_ERR_INVALID_ATTRIBUTE_LEN);
 	}
 	
+	/* Validate payload fits in work item buffer */
+	if (hdr->payload_len > sizeof(cmd_work.data)) {
+		LOG_ERR("Payload too large: %u bytes (max %u)", 
+			hdr->payload_len, (uint8_t)sizeof(cmd_work.data));
+		return BT_GATT_ERR(BT_ATT_ERR_INVALID_ATTRIBUTE_LEN);
+	}
+	
 	/* Queue command for processing in workqueue */
 	cmd_work.msg_type = hdr->msg_type;
 	cmd_work.data_len = hdr->payload_len;
@@ -195,6 +202,9 @@ BT_GATT_SERVICE_DEFINE(legctrl_svc,
 	BT_GATT_CCC(telemetry_ccc_changed, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
 );
 
+/* Index of telemetry characteristic value attribute in legctrl_svc.attrs[] */
+#define TELEMETRY_ATTR_IDX 4
+
 /* Command work handler - runs in workqueue context */
 static void cmd_work_handler(struct k_work *work)
 {
@@ -213,9 +223,10 @@ static void cmd_work_handler(struct k_work *work)
 		
 	case MSG_TYPE_CMD_SET_SERVO_CH0:
 		if (item->data_len == sizeof(struct cmd_set_servo_ch0)) {
-			struct cmd_set_servo_ch0 *cmd = 
-				(struct cmd_set_servo_ch0 *)item->data;
-			process_cmd_set_servo_ch0(cmd->pulse_us);
+			/* Extract pulse_us with explicit little-endian handling */
+			uint16_t pulse_us = (uint16_t)item->data[0] | 
+					    ((uint16_t)item->data[1] << 8);
+			process_cmd_set_servo_ch0(pulse_us);
 		} else {
 			LOG_ERR("Invalid SET_SERVO_CH0 payload length: %u", item->data_len);
 		}
@@ -331,11 +342,12 @@ int ble_service_send_telemetry(void)
 	msg.payload.state = sys_state.state;
 	msg.payload.error_code = sys_state.error_code;
 	msg.payload.last_cmd_age_ms = ble_service_get_last_cmd_age_ms();
+	/* TODO: Replace stub battery voltage with actual ADC reading */
 	msg.payload.battery_mv = 7400;  /* Stub value: 7.4V */
 	msg.payload.reserved = 0;
 	
 	/* Send notification */
-	int ret = bt_gatt_notify(sys_state.conn, &legctrl_svc.attrs[4], 
+	int ret = bt_gatt_notify(sys_state.conn, &legctrl_svc.attrs[TELEMETRY_ATTR_IDX], 
 				 &msg, sizeof(msg));
 	
 	if (ret < 0) {

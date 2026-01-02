@@ -1,0 +1,31 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Device Tree Overlay for XIAO nRF52840
+ * Adds PCA9685 PWM controller on I2C bus
+ */
+
+&i2c1 {
+	compatible = "nordic,nrf-twim";
+	status = "okay";
+	
+	/* XIAO nRF52840 I2C pins:
+	 * SDA: P0.04 (D4)
+	 * SCL: P0.05 (D5)
+	 */
+	sda-pin = <4>;
+	scl-pin = <5>;
+	clock-frequency = <I2C_BITRATE_STANDARD>; /* 100kHz */
+
+	pca9685: pca9685@40 {
+		compatible = "nxp,pca9685-pwm";
+		reg = <0x40>;
+		status = "okay";
+		
+		/* PWM configuration for servo control
+		 * Frequency: 50Hz (20ms period) for standard servos
+		 */
+		#pwm-cells = <3>;
+		pwm-frequency = <50>;
+	};
+};

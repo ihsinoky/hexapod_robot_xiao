@@ -33,6 +33,7 @@ int main(void)
 {
 	const struct device *pwm_dev;
 	int ret;
+	uint32_t pwm_freq_hz = 50; /* 50Hz for servos */
 
 	LOG_INF("===========================================");
 	LOG_INF("LegCtrl Firmware - XIAO nRF52840");
@@ -50,10 +51,17 @@ int main(void)
 
 	/* Set servo channel 0 to safe center position (1500μs)
 	 * This prevents sudden movement on startup
+	 * 
+	 * pwm_set parameters:
+	 * - device: PWM device
+	 * - channel: PWM channel (0-15 for PCA9685)
+	 * - period: PWM period in nanoseconds (20ms = 20,000,000ns for 50Hz)
+	 * - pulse: Pulse width in nanoseconds (1500μs = 1,500,000ns)
+	 * - flags: PWM polarity flags (0 for normal polarity)
 	 */
 	ret = pwm_set(pwm_dev, SERVO_CHANNEL_0, 
 		      SERVO_PWM_PERIOD_NS, SERVO_PULSE_CENTER_NS, 
-		      PWM_POLARITY_NORMAL);
+		      0);
 
 	if (ret < 0) {
 		LOG_ERR("Failed to set PWM for servo channel 0: %d", ret);

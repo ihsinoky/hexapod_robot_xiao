@@ -62,7 +62,7 @@
 
 ret = pwm_set(pwm_dev, SERVO_CHANNEL_0, 
               SERVO_PWM_PERIOD_NS, SERVO_PULSE_CENTER_NS, 
-              PWM_POLARITY_NORMAL);
+              0);  /* 0 = normal polarity */
 ```
 
 ---

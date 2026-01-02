@@ -5,6 +5,12 @@
  * Adds PCA9685 PWM controller on I2C bus
  */
 
+/ {
+	aliases {
+		pwm-0 = &pca9685;
+	};
+};
+
 &i2c1 {
 	compatible = "nordic,nrf-twim";
 	status = "okay";
@@ -26,6 +32,5 @@
 		 * Frequency: 50Hz (20ms period) for standard servos
 		 */
 		#pwm-cells = <3>;
-		pwm-frequency = <50>;
 	};
 };

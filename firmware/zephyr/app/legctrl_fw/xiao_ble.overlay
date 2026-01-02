@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Device Tree Overlay for XIAO nRF52840
+ * Device Tree Overlay for xiao_ble (XIAO nRF52840)
  * Adds PCA9685 PWM controller on I2C bus
  */
 

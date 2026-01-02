@@ -38,7 +38,7 @@ west flash --runner uf2
 LegCtrl Firmware - XIAO nRF52840
 ===========================================
 Zephyr version: x.x.x
-Board: xiao_nrf52840
+Board: xiao_ble
 PCA9685 PWM device ready
 Servo channel 0 initialized:
   - PWM frequency: 50Hz (period: 20ms)

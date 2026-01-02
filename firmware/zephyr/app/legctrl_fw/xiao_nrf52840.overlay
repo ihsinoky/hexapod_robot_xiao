@@ -5,6 +5,8 @@
  * Adds PCA9685 PWM controller on I2C bus
  */
 
+#include <zephyr/dt-bindings/i2c/i2c.h>
+
 / {
 	aliases {
 		pwm-0 = &pca9685;

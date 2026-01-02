@@ -33,7 +33,6 @@ int main(void)
 {
 	const struct device *pwm_dev;
 	int ret;
-	uint32_t pwm_freq_hz = 50; /* 50Hz for servos */
 
 	LOG_INF("===========================================");
 	LOG_INF("LegCtrl Firmware - XIAO nRF52840");

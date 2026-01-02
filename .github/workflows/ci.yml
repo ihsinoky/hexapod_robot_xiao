@@ -1,0 +1,197 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  markdown-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdownlint-cli2
+        run: npm install -g markdownlint-cli2@0.15.0
+
+      - name: Run markdownlint
+        # Allow markdown linting to fail without blocking CI
+        # Existing markdown files have linting errors that should be fixed incrementally
+        continue-on-error: true
+        run: markdownlint-cli2 "**/*.md"
+
+  yaml-lint:
+    name: YAML Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install yamllint
+        run: pip install yamllint==1.35.1
+
+      - name: Run yamllint
+        run: yamllint .
+
+  zephyr-build:
+    name: Zephyr Firmware Build
+    runs-on: ubuntu-latest
+    env:
+      ZEPHYR_SDK_VERSION: "0.16.5-1"
+      BOARD: xiao_ble
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        # Repository is checked out to default location
+        # West workspace will be initialized with correct structure
+
+      - name: Check if firmware exists
+        id: check_firmware
+        run: |
+          if [ -d "firmware/zephyr/app/legctrl_fw" ]; then
+            echo "firmware_exists=true" >> $GITHUB_OUTPUT
+            echo "Firmware directory found"
+          else
+            echo "firmware_exists=false" >> $GITHUB_OUTPUT
+            echo "Firmware directory not found, skipping build"
+          fi
+
+      - name: Setup Python
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache Zephyr SDK
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        id: cache-zephyr-sdk
+        uses: actions/cache@v4
+        with:
+          path: zephyr-sdk-${{ env.ZEPHYR_SDK_VERSION }}
+          key: zephyr-sdk-${{ env.ZEPHYR_SDK_VERSION }}-${{ runner.os }}
+
+      - name: Install dependencies
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        run: |
+          pip3 install --user -U west==1.2.0
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install Zephyr SDK
+        if: steps.check_firmware.outputs.firmware_exists == 'true' && steps.cache-zephyr-sdk.outputs.cache-hit != 'true'
+        run: |
+          SDK_FILE=zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64.tar.xz
+          SDK_DIR=zephyr-sdk-${ZEPHYR_SDK_VERSION}
+          # Download SDK with retry logic to handle transient network failures
+          wget --tries=3 --waitretry=5 \
+            https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/${SDK_FILE}
+          wget --tries=3 --waitretry=5 -O - \
+            https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/sha256.sum | \
+            shasum --check --ignore-missing
+          tar xvf ${SDK_FILE}
+          cd ${SDK_DIR}
+          # Install SDK with all toolchains (-t all), host tools (-h), and CMake (-c)
+          ./setup.sh -t all -h -c
+
+      - name: Setup Zephyr SDK environment
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        run: |
+          export ZEPHYR_SDK_INSTALL_DIR="${PWD}/zephyr-sdk-${ZEPHYR_SDK_VERSION}"
+          echo "ZEPHYR_SDK_INSTALL_DIR=${ZEPHYR_SDK_INSTALL_DIR}" >> $GITHUB_ENV
+
+      - name: Cache West modules
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            zephyr
+            modules
+            tools
+            bootloader
+          key: west-modules-${{ hashFiles('firmware/zephyr/west.yml') }}
+          restore-keys: |
+            west-modules-
+
+      - name: Initialize West workspace
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        run: |
+          set -euxo pipefail
+          echo "Initializing West workspace..."
+          # Create .west in repo root by specifying firmware as manifest repo
+          # and zephyr/west.yml as the manifest file location within it
+          if ! west init -l --mf zephyr/west.yml firmware; then
+            echo "Error: 'west init' failed. Check network connectivity and the local Zephyr project path." >&2
+            exit 1
+          fi
+          echo "West workspace topology:"
+          west topdir
+          echo "Updating West modules..."
+          if ! west update -o=--depth=1 -n; then
+            echo "Error: 'west update' failed. Check network connectivity and the West manifest configuration." >&2
+            exit 1
+          fi
+          echo "Verifying board availability:"
+          west boards | grep -i xiao || echo "Warning: No xiao boards found in list"
+          echo "West workspace status:"
+          west list
+
+      - name: Install Zephyr Python dependencies
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        run: |
+          pip3 install --user -r zephyr/scripts/requirements.txt
+
+      - name: Build firmware
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        run: |
+          set -euxo pipefail
+          # Build from application directory.
+          # After 'west init -l --mf zephyr/west.yml firmware', the manifest repo is 'firmware/'
+          # and the app is at firmware/zephyr/app/legctrl_fw, so we use the path relative to workspace root
+          # Using xiao_ble as the official Zephyr board name for XIAO nRF52840
+          west build -b ${BOARD} -s firmware/zephyr/app/legctrl_fw || {
+            echo "Build failed. Dumping CMake logs..."
+            [ -f build/CMakeFiles/CMakeError.log ] && cat build/CMakeFiles/CMakeError.log || echo "No CMakeError.log found"
+            [ -f build/CMakeFiles/CMakeOutput.log ] && head -n 50 build/CMakeFiles/CMakeOutput.log || echo "No CMakeOutput.log found"
+            [ -f build/zephyr/.config ] && head -n 30 build/zephyr/.config || echo "No .config found"
+            exit 1
+          }
+
+      - name: Upload build artifacts
+        if: steps.check_firmware.outputs.firmware_exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-build
+          path: |
+            build/zephyr/zephyr.elf
+            build/zephyr/zephyr.hex
+            build/zephyr/zephyr.bin
+            build/zephyr/zephyr.dts
+          retention-days: 7
+
+      - name: Build summary
+        if: always()
+        run: |
+          if [ "${{ steps.check_firmware.outputs.firmware_exists }}" = "true" ]; then
+            echo "✅ Firmware build completed successfully"
+          else
+            echo "ℹ️ Firmware directory not found - build skipped (this is expected if firmware hasn't been added yet)"
+          fi

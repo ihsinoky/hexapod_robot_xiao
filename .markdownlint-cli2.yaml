@@ -1,0 +1,27 @@
+# markdownlint-cli2 configuration
+# See: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
+# Glob patterns to ignore
+ignores:
+  - "node_modules"
+  - "**/node_modules"
+  - ".git"
+
+# Custom configuration
+config:
+  # MD013: Line length
+  MD013:
+    # Set a reasonable line length limit
+    line_length: 120
+    # Allow long lines in code blocks and tables
+    code_blocks: false
+    tables: false
+
+  # MD033: Allow inline HTML (sometimes needed for documentation)
+  MD033: false
+
+  # MD041: First line in file should be a top-level heading
+  # Disabled because many project Markdown files start with front matter or other non-heading
+  # content (for example, metadata blocks or badges), so enforcing this rule would produce
+  # excessive noise without improving readability in this codebase.
+  MD041: false

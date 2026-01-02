@@ -19,6 +19,13 @@
 - Do not change authentication flow without explicit instruction.
 - Avoid adding new dependencies unless necessary.
 
+## Zephyr firmware (firmware/zephyr)
+- 変更後は必ず以下でビルド検証する:
+  west build -p always -b xiao_ble -s firmware/zephyr/app/legctrl_fw
+- Devicetree のエラー/警告は必ず解消する（overlay名、bindings、#pwm-cells等）
+- CIやワークフローの変更は要求がない限り行わない
+- 修正は最小差分で行う
+
 ## PRレビュー / コードレビュー（Copilot coding agent 向け）
 
 - コメントは日本語で記述すること

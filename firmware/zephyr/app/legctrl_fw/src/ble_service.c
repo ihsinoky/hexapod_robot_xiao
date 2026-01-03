@@ -79,6 +79,9 @@ struct cmd_work_item {
 
 static struct cmd_work_item cmd_work;
 
+/* Mutex to protect cmd_work from concurrent access */
+static K_MUTEX_DEFINE(cmd_work_mutex);
+
 /* PWM device */
 static const struct device *pwm_dev;
 
@@ -115,10 +118,18 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 		sys_state.conn = NULL;
 	}
 	
-	/* Go to FAULT state on disconnect */
+	/* Go to FAULT state on disconnect and stop PWM output */
 	sys_state.state = STATE_FAULT;
 	sys_state.error_code = ERR_NONE;
 	sys_state.telemetry_enabled = false;
+	
+	/* Stop PWM output to ensure safe shutdown on disconnect */
+	if (pwm_dev && device_is_ready(pwm_dev)) {
+		int ret = pwm_set(pwm_dev, SERVO_CHANNEL_0, SERVO_PWM_PERIOD_NS, 0, 0);
+		if (ret != 0) {
+			LOG_ERR("Failed to stop PWM on disconnect (err %d)", ret);
+		}
+	}
 }
 
 BT_CONN_CB_DEFINE(conn_callbacks) = {
@@ -162,6 +173,12 @@ static ssize_t cmd_write(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 		return BT_GATT_ERR(BT_ATT_ERR_INVALID_ATTRIBUTE_LEN);
 	}
 	
+	/* Acquire mutex to protect cmd_work from concurrent access */
+	if (k_mutex_lock(&cmd_work_mutex, K_NO_WAIT) != 0) {
+		LOG_WRN("Command busy, dropping new command");
+		return BT_GATT_ERR(BT_ATT_ERR_UNLIKELY);
+	}
+	
 	/* Queue command for processing in workqueue */
 	cmd_work.msg_type = hdr->msg_type;
 	cmd_work.data_len = hdr->payload_len;
@@ -172,6 +189,7 @@ static ssize_t cmd_write(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 	}
 	
 	k_work_submit_to_queue(&cmd_work_q, &cmd_work.work);
+	/* Note: mutex will be released in cmd_work_handler after processing */
 	
 	return len;
 }
@@ -241,6 +259,9 @@ static void cmd_work_handler(struct k_work *work)
 		sys_state.error_code = ERR_INVALID_CMD;
 		break;
 	}
+	
+	/* Release mutex after processing command */
+	k_mutex_unlock(&cmd_work_mutex);
 }
 
 /* Process ARM command */
@@ -248,11 +269,13 @@ static void process_cmd_arm(void)
 {
 	LOG_INF("CMD_ARM");
 	
-	if (sys_state.state == STATE_DISARMED || sys_state.state == STATE_FAULT) {
+	if (sys_state.state == STATE_DISARMED) {
 		sys_state.state = STATE_ARMED;
 		sys_state.error_code = ERR_NONE;
 		sys_state.last_cmd_timestamp = k_uptime_get();
 		LOG_INF("State: ARMED");
+	} else if (sys_state.state == STATE_FAULT) {
+		LOG_WRN("Cannot ARM from FAULT state. Send DISARM first to clear fault.");
 	}
 }
 
@@ -267,8 +290,12 @@ static void process_cmd_disarm(void)
 	
 	/* Stop PWM output */
 	if (pwm_dev && device_is_ready(pwm_dev)) {
-		pwm_set(pwm_dev, SERVO_CHANNEL_0, SERVO_PWM_PERIOD_NS, 0, 0);
-		LOG_INF("Servo output stopped");
+		int ret = pwm_set(pwm_dev, SERVO_CHANNEL_0, SERVO_PWM_PERIOD_NS, 0, 0);
+		if (ret < 0) {
+			LOG_ERR("Failed to stop servo output (err %d)", ret);
+		} else {
+			LOG_INF("Servo output stopped");
+		}
 	}
 	
 	LOG_INF("State: DISARMED");
@@ -305,6 +332,7 @@ static void process_cmd_set_servo_ch0(uint16_t pulse_us)
 		
 		if (ret < 0) {
 			LOG_ERR("Failed to set PWM: %d", ret);
+			sys_state.state = STATE_FAULT;
 			sys_state.error_code = ERR_I2C_FAULT;
 		} else {
 			LOG_INF("Servo set to %u us", pulse_us);
@@ -338,12 +366,17 @@ int ble_service_send_telemetry(void)
 	msg.hdr.payload_len = sizeof(struct telemetry_payload);
 	msg.hdr.reserved = 0x00;
 	
-	/* Fill payload */
+	/* Fill payload with explicit little-endian encoding */
 	msg.payload.state = sys_state.state;
 	msg.payload.error_code = sys_state.error_code;
-	msg.payload.last_cmd_age_ms = ble_service_get_last_cmd_age_ms();
+	
+	uint16_t last_cmd_age = ble_service_get_last_cmd_age_ms();
+	msg.payload.last_cmd_age_ms = last_cmd_age;  /* Little-endian on nRF52 */
+	
 	/* TODO: Replace stub battery voltage with actual ADC reading */
-	msg.payload.battery_mv = 7400;  /* Stub value: 7.4V */
+	uint16_t battery = 7400;  /* Stub value: 7.4V */
+	msg.payload.battery_mv = battery;  /* Little-endian on nRF52 */
+	
 	msg.payload.reserved = 0;
 	
 	/* Send notification */
@@ -407,8 +440,12 @@ void ble_service_update_deadman(void)
 		
 		/* Stop PWM output */
 		if (pwm_dev && device_is_ready(pwm_dev)) {
-			pwm_set(pwm_dev, SERVO_CHANNEL_0, SERVO_PWM_PERIOD_NS, 0, 0);
-			LOG_INF("Servo output stopped due to deadman timeout");
+			int ret = pwm_set(pwm_dev, SERVO_CHANNEL_0, SERVO_PWM_PERIOD_NS, 0, 0);
+			if (ret != 0) {
+				LOG_ERR("Failed to stop servo output (err %d)", ret);
+			} else {
+				LOG_INF("Servo output stopped due to deadman timeout");
+			}
 		}
 	}
 }

@@ -232,8 +232,10 @@ static void telemetry_timer_handler(struct k_timer *timer)
 
 **ポイント**:
 - Telemetryタイマーと同期してデッドマンチェック
-- 100ms周期でチェックするため、最大遅延は100ms（200ms + 最大100ms = 最悪300ms）
-- 実際には、200ms到達後の次回チェック（100msまたは200ms時点）で検出される
+- 100ms周期でチェックするため、実際のタイムアウトは**200～300msの範囲**となる
+  - ベストケース: 200ms経過直後のチェックで検出（200ms）
+  - ワーストケース: 199msで最後のチェックをパスし、次の299msでタイムアウト検出（最大300ms）
+- 仕様上の200msタイムアウトは「目標値」であり、実装上は最大300msまで許容される
 
 ### 4.4 タイムスタンプ更新
 
@@ -426,9 +428,11 @@ struct telemetry_msg {
 ```
 
 **使用箇所**:
-- `ERR_DEADMAN_TIMEOUT`: デッドマンタイムアウト時（Line 439）
-- `ERR_I2C_FAULT`: PWM設定失敗時（Line 336）
-- `ERR_INVALID_CMD`: 未知のコマンド受信時（Line 259）
+- `ERR_DEADMAN_TIMEOUT`: デッドマンタイムアウト時（ble_service.c:439）
+- `ERR_I2C_FAULT`: PWM設定失敗時（ble_service.c:336）
+- `ERR_INVALID_CMD`: 未知のコマンド受信時（ble_service.c:259）
+
+**注**: 行番号は実装コードの参照として記載しています。コード変更により行番号がずれる可能性があります。
 
 ---
 

@@ -42,7 +42,7 @@
 - ✅ シリアルログに "System started successfully" が表示される
 - ✅ Telemetryで `state = 0x00` (DISARMED) が受信される
 - ✅ Telemetryで `error_code = 0x00` (ERR_NONE) が受信される
-- ✅ サーボは動かない（PWM出力なし、または中立位置で固定）
+- ✅ サーボは初期位置（1500us、中立位置）で固定。main.cで起動時に設定されるが、DISARMED状態のため制御コマンドには応答しない
 
 **合格基準**: すべての期待結果が確認できること
 
@@ -231,7 +231,7 @@
 5. Telemetryで `state` を監視
 
 **期待結果**:
-- ✅ `last_cmd_age_ms` が150ms以下を維持する
+- ✅ `last_cmd_age_ms` が180ms以下を維持する（150ms送信周期 + 最大30msのジッタ/遅延を考慮）
 - ✅ `state = 0x01` (ARMED) のまま維持される
 - ✅ FAULT状態に遷移しない
 - ✅ シリアルログに "CMD_PING" が定期的に表示される

@@ -34,6 +34,16 @@ class BLEManager: NSObject, ObservableObject {
     // Periodic sending at 50 Hz (20ms interval) to prevent deadman timeout
     private let periodicTimerInterval: TimeInterval = 0.02
     
+    // Maximum number of log messages to keep
+    private let maxLogMessages = 100
+    
+    // Reusable date formatter for log timestamps
+    private lazy var logDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss.SSS"
+        return formatter
+    }()
+    
     // MARK: - Initialization
     
     override init() {
@@ -133,25 +143,26 @@ class BLEManager: NSObject, ObservableObject {
     }
     
     func stopPeriodicSending() {
+        let wasEnabled = isPeriodicSendingEnabled
         periodicTimer?.invalidate()
         periodicTimer = nil
         isPeriodicSendingEnabled = false
         lastCommandData = nil
-        addLog("Periodic sending stopped")
+        if wasEnabled {
+            addLog("Periodic sending stopped")
+        }
     }
     
     // MARK: - Private Methods
     
     private func addLog(_ message: String) {
         let timestamp = Date()
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm:ss.SSS"
-        let logEntry = "[\(formatter.string(from: timestamp))] \(message)"
+        let logEntry = "[\(logDateFormatter.string(from: timestamp))] \(message)"
         
         DispatchQueue.main.async {
             self.logMessages.append(logEntry)
-            // Keep only last 100 messages
-            if self.logMessages.count > 100 {
+            // Keep only last maxLogMessages
+            if self.logMessages.count > self.maxLogMessages {
                 self.logMessages.removeFirst()
             }
         }
@@ -209,6 +220,7 @@ extension BLEManager: CBCentralManagerDelegate {
         connectedPeripheral = nil
         commandCharacteristic = nil
         telemetryCharacteristic = nil
+        telemetryData = nil
         
         stopPeriodicSending()
     }

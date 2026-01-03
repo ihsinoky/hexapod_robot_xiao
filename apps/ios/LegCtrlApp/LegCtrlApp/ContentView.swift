@@ -142,9 +142,8 @@ struct ContentView: View {
                 .disabled(isArmed)
                 
                 Button(action: {
-                    bleManager.stopPeriodicSending()
-                    bleManager.disarm()
                     isPeriodicMode = false
+                    bleManager.disarm()
                 }) {
                     Label("DISARM", systemImage: "stop.circle")
                         .frame(maxWidth: .infinity)

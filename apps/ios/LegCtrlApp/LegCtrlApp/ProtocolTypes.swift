@@ -43,14 +43,6 @@ enum SystemState: UInt8 {
         case .fault: return "FAULT"
         }
     }
-    
-    var color: String {
-        switch self {
-        case .disarmed: return "gray"
-        case .armed: return "green"
-        case .fault: return "red"
-        }
-    }
 }
 
 // MARK: - Error Codes

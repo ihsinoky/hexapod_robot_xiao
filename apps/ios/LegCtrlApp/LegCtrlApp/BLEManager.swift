@@ -31,6 +31,9 @@ class BLEManager: NSObject, ObservableObject {
     private var lastCommandData: Data?
     private var isPeriodicSendingEnabled = false
     
+    // Periodic sending at 50 Hz (20ms interval) to prevent deadman timeout
+    private let periodicTimerInterval: TimeInterval = 0.02
+    
     // MARK: - Initialization
     
     override init() {
@@ -116,8 +119,7 @@ class BLEManager: NSObject, ObservableObject {
         lastCommandData = CommandMessage.setServoCh0(pulseUs: pulseUs)
         isPeriodicSendingEnabled = true
         
-        // Send at 50 Hz (20ms interval)
-        periodicTimer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { [weak self] _ in
+        periodicTimer = Timer.scheduledTimer(withTimeInterval: periodicTimerInterval, repeats: true) { [weak self] _ in
             guard let self = self, let data = self.lastCommandData else { return }
             self.sendCommand(data)
         }

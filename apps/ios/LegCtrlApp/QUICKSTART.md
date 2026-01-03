@@ -112,7 +112,7 @@ SwiftUI UI:
 #### SET_SERVO_CH0 (0x03)
 ```
 [01 03 02 00 DC 05]
- │  │  │  │  └───┴─ pulse_us (Little-endian, 0x05DC = 1500)
+ │  │  │  │  └───┴─ pulse_us (Little-endian, DC 05 = 1500)
  │  │  │  └──────── reserved
  │  │  └─────────── payload_len (2)
  │  └────────────── msg_type (0x03)

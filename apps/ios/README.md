@@ -7,7 +7,7 @@ iPad向けの操縦アプリ（CoreBluetooth使用）
 - 操縦UI、接続管理、周期送信、テレメトリ表示を実装
 
 ## 開発環境
-- macOS + Xcode 15.0以上
+- macOS + Xcode 15.0 以上
 - 言語: Swift 5.0
 - BLE: CoreBluetooth
 - UI: SwiftUI

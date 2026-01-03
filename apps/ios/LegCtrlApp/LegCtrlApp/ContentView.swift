@@ -133,13 +133,13 @@ struct ContentView: View {
                     Label("ARM", systemImage: "power")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(stateColor == "green" ? Color.green.opacity(0.3) : Color.green)
+                        .background(isArmed ? Color.green.opacity(0.3) : Color.green)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                         .font(.headline)
                 }
                 .buttonStyle(.plain)
-                .disabled(stateColor == "green")
+                .disabled(isArmed)
                 
                 Button(action: {
                     bleManager.stopPeriodicSending()
@@ -315,8 +315,8 @@ struct ContentView: View {
     
     // MARK: - Helpers
     
-    private var stateColor: String {
-        bleManager.telemetryData?.state.color ?? "gray"
+    private var isArmed: Bool {
+        bleManager.telemetryData?.state == .armed
     }
     
     private func telemetryStateColor(_ state: SystemState) -> Color {

@@ -206,7 +206,7 @@ Offset | Size | Field            | Description
 0      | 1    | state            | 現在の状態 (0x00=DISARMED, 0x01=ARMED, 0x02=FAULT)
 1      | 1    | error_code       | エラーコード (0x00=正常, 下記参照)
 2      | 2    | last_cmd_age_ms  | 最終有効コマンドからの経過時間 (ms)
-4      | 2    | battery_mv       | バッテリー電圧 (mV) ※スタブ可
+4      | 2    | battery_mv       | バッテリー電圧 (mV) ※v0.1ではスタブ実装
 6      | 2    | reserved         | 予約（将来用、常に 0x0000）
 ```
 
@@ -216,6 +216,13 @@ Offset | Size | Field            | Description
 - `last_cmd_age_ms`: ミリ秒 (ms)
 - `battery_mv`: ミリボルト (mV)
 - **エンディアン**: Little Endian
+
+**battery_mv スタブ実装仕様 (v0.1)**:
+- v0.1 では実際のバッテリー電圧測定は未実装
+- **固定値**: 7400 mV (7.4V) を常に返す
+- この値は標準的な 2S LiPo バッテリーの公称電圧を想定したプレースホルダー
+- Central 側でこの値を受信した場合、実測値ではないことを認識する必要がある
+- 将来のバージョンでADC測定による実装に置き換える予定
 
 **Example (hex)**: state=ARMED, no error, 50ms since last cmd, 7400mV battery
 ```

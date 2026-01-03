@@ -373,8 +373,19 @@ int ble_service_send_telemetry(void)
 	uint16_t last_cmd_age = ble_service_get_last_cmd_age_ms();
 	msg.payload.last_cmd_age_ms = last_cmd_age;  /* Little-endian on nRF52 */
 	
-	/* TODO: Replace stub battery voltage with actual ADC reading */
-	uint16_t battery = 7400;  /* Stub value: 7.4V */
+	/* Battery voltage - v0.1 stub implementation
+	 * 
+	 * Current implementation: Fixed value of 7400 mV (7.4V)
+	 * This represents the nominal voltage of a 2S LiPo battery.
+	 * 
+	 * Future implementation: Replace with actual ADC reading
+	 * - ADC channel for battery voltage divider
+	 * - Apply appropriate scaling factor
+	 * - Implement low-pass filtering for stable readings
+	 * 
+	 * See: shared/protocol/spec/legctrl_protocol.md for specification details
+	 */
+	uint16_t battery = 7400;  /* Stub: 7400 mV = 7.4V (2S LiPo nominal) */
 	msg.payload.battery_mv = battery;  /* Little-endian on nRF52 */
 	
 	msg.payload.reserved = 0;

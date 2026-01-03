@@ -102,9 +102,11 @@ Total: 12 bytes
    ├─ state: 1 byte (DISARMED/ARMED/FAULT)
    ├─ error_code: 1 byte (エラーコード)
    ├─ last_cmd_age_ms: 2 bytes (最終コマンドからの経過時間)
-   ├─ battery_mv: 2 bytes (バッテリー電圧 mV)
+   ├─ battery_mv: 2 bytes (バッテリー電圧 mV, v0.1ではスタブ実装)
    └─ reserved: 2 bytes (将来用)
 ```
+
+> **注意**: v0.1 では `battery_mv` はスタブ実装（固定値 7400 mV）です。詳細は `shared/protocol/spec/legctrl_protocol.md` を参照してください。
 
 詳細は `shared/protocol/spec/legctrl_protocol.md` を参照してください。
 

@@ -180,7 +180,7 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 
 **成果物**:
 - Telemetry実装（`ble_service.c:354-395`）
-- `docs/S1-08_telemetry_implementation.md` (199行)
+- `docs/S1-08_telemetry_implementation.md` (235行)
 - `docs/S1-08_acceptance_validation.md` (374行)
 
 **テレメトリフィールド**:

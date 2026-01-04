@@ -91,7 +91,7 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 **成果物**:
 - `firmware/zephyr/app/legctrl_fw/` - アプリケーションコード
 - `firmware/zephyr/west.yml` - West manifest
-- `docs/build_flash.md` (301行) - ビルド・フラッシュ手順書
+- `docs/build_flash.md` (358行) - ビルド・フラッシュ手順書
 
 **実装内容**:
 - CMakeLists.txt - ビルド設定

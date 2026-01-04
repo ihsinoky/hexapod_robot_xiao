@@ -49,7 +49,7 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 **Status**: COMPLETE
 
 **成果物**:
-- `shared/protocol/spec/legctrl_protocol.md` (443行)
+- `shared/protocol/spec/legctrl_protocol.md` (465行)
 
 **仕様内容**:
 - メッセージ形式（Little Endian、4 byteヘッダ）

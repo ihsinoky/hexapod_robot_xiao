@@ -158,7 +158,7 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 - `docs/safety_implementation.md` (527行) - 実装詳細
 - `docs/safety_test.md` (343行) - テスト計画
 - `docs/safety.md` (404行) - 安全運用ガイドライン
-- `docs/S1-07_completion.md` (294行) - 完了サマリー
+- `docs/S1-07_completion.md` (295行) - 完了サマリー
 
 **実装機能**:
 1. **状態機械**: DISARMED/ARMED/FAULT（起動時DISARMED）

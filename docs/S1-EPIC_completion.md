@@ -234,7 +234,7 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 **Status**: COMPLETE
 
 **成果物**:
-- `docs/test_plan_sprint01.md` (712行) - Sprint 1包括的テスト計画
+- `docs/test_plan_sprint01.md` (781行) - Sprint 1包括的テスト計画
 
 **テストシナリオ**:
 - TS-01: 接続確認（広告→接続）

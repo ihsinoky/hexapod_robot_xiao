@@ -156,7 +156,7 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 **成果物**:
 - Safety実装（`ble_service.c`内）
 - `docs/safety_implementation.md` (527行) - 実装詳細
-- `docs/safety_test.md` (342行) - テスト計画
+- `docs/safety_test.md` (343行) - テスト計画
 - `docs/safety.md` (404行) - 安全運用ガイドライン
 - `docs/S1-07_completion.md` (294行) - 完了サマリー
 

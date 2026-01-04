@@ -133,7 +133,7 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 
 **成果物**:
 - `firmware/zephyr/app/legctrl_fw/src/ble_service.c` (513行)
-- `firmware/zephyr/app/legctrl_fw/src/ble_service.h` (60行)
+- `firmware/zephyr/app/legctrl_fw/src/ble_service.h` (99行)
 
 **実装機能**:
 - BLE GATT Service/Characteristic定義

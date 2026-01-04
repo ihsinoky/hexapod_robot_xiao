@@ -206,7 +206,7 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 **Status**: COMPLETE
 
 **成果物**:
-- `docs/wiring_pca9685.md` (457行) - 配線ガイド
+- `docs/wiring_pca9685.md` (493行) - 配線ガイド
 - `docs/safety.md` (349行) - 安全運用ガイドライン
 - `docs/quick_start.md` (70行) - クイックスタート
 

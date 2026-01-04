@@ -49,7 +49,7 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 **Status**: COMPLETE
 
 **成果物**:
-- `shared/protocol/spec/legctrl_protocol.md` (465行)
+- `shared/protocol/spec/legctrl_protocol.md` (464行)
 
 **仕様内容**:
 - メッセージ形式（Little Endian、4 byteヘッダ）
@@ -69,7 +69,7 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 **Status**: COMPLETE
 
 **成果物**:
-- `docs/ble_protocol.md` (309行)
+- `docs/ble_protocol.md` (308行)
 
 **内容**:
 - Service UUID: `12345678-1234-1234-1234-123456789abc`
@@ -91,7 +91,7 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 **成果物**:
 - `firmware/zephyr/app/legctrl_fw/` - アプリケーションコード
 - `firmware/zephyr/west.yml` - West manifest
-- `docs/build_flash.md` (358行) - ビルド・フラッシュ手順書
+- `docs/build_flash.md` (357行) - ビルド・フラッシュ手順書
 
 **実装内容**:
 - CMakeLists.txt - ビルド設定
@@ -112,7 +112,7 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 **成果物**:
 - `firmware/zephyr/app/legctrl_fw/src/main.c` - PWM初期化
 - `firmware/zephyr/app/legctrl_fw/src/ble_service.c` - PWM制御
-- `docs/servo_control.md` - サーボ制御仕様
+- `docs/servo_control.md` (165行) - サーボ制御仕様
 
 **実装詳細**:
 - PCA9685デバイスツリー定義（`xiao_ble.overlay`）
@@ -132,8 +132,8 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 **Status**: COMPLETE
 
 **成果物**:
-- `firmware/zephyr/app/legctrl_fw/src/ble_service.c` (513行)
-- `firmware/zephyr/app/legctrl_fw/src/ble_service.h` (99行)
+- `firmware/zephyr/app/legctrl_fw/src/ble_service.c` (512行)
+- `firmware/zephyr/app/legctrl_fw/src/ble_service.h` (98行)
 
 **実装機能**:
 - BLE GATT Service/Characteristic定義
@@ -155,10 +155,10 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 
 **成果物**:
 - Safety実装（`ble_service.c`内）
-- `docs/safety_implementation.md` (528行) - 実装詳細
-- `docs/safety_test.md` (343行) - テスト計画
-- `docs/safety.md` (404行) - 安全運用ガイドライン
-- `docs/S1-07_completion.md` (295行) - 完了サマリー
+- `docs/safety_implementation.md` (527行) - 実装詳細
+- `docs/safety_test.md` (342行) - テスト計画
+- `docs/safety.md` (403行) - 安全運用ガイドライン
+- `docs/S1-07_completion.md` (294行) - 完了サマリー
 
 **実装機能**:
 1. **状態機械**: DISARMED/ARMED/FAULT（起動時DISARMED）
@@ -180,8 +180,8 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 
 **成果物**:
 - Telemetry実装（`ble_service.c:354-395`）
-- `docs/S1-08_telemetry_implementation.md` (235行)
-- `docs/S1-08_acceptance_validation.md` (374行)
+- `docs/S1-08_telemetry_implementation.md` (234行)
+- `docs/S1-08_acceptance_validation.md` (373行)
 
 **テレメトリフィールド**:
 - `state` (uint8_t): DISARMED/ARMED/FAULT
@@ -206,9 +206,9 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 **Status**: COMPLETE
 
 **成果物**:
-- `docs/wiring_pca9685.md` (493行) - 配線ガイド
-- `docs/safety.md` (349行) - 安全運用ガイドライン
-- `docs/quick_start.md` (95行) - クイックスタート
+- `docs/wiring_pca9685.md` (492行) - 配線ガイド
+- `docs/safety.md` (403行) - 安全運用ガイドライン
+- `docs/quick_start.md` (94行) - クイックスタート
 
 **内容**:
 - **電源分離**: ロジック系（XIAO）とサーボ系（PCA9685）の電源独立
@@ -234,7 +234,7 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 **Status**: COMPLETE
 
 **成果物**:
-- `docs/test_plan_sprint01.md` (781行) - Sprint 1包括的テスト計画
+- `docs/test_plan_sprint01.md` (780行) - Sprint 1包括的テスト計画
 
 **テストシナリオ**:
 - TS-01: 接続確認（広告→接続）
@@ -419,17 +419,17 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 **成果物**:
 | ドキュメント | 行数 | 内容 |
 |-------------|------|------|
-| `wiring_pca9685.md` | 457 | 配線ガイド（電源分離・GND共通化・図解） |
-| `safety.md` | 349 | 安全運用ガイドライン |
+| `wiring_pca9685.md` | 492 | 配線ガイド（電源分離・GND共通化・図解） |
+| `safety.md` | 403 | 安全運用ガイドライン |
 | `safety_implementation.md` | 527 | Safety実装詳細 |
 | `safety_test.md` | 342 | Safetyテスト計画 |
-| `build_flash.md` | 301 | ビルド・フラッシュ手順 |
-| `ble_protocol.md` | 320 | BLEプロトコル詳細 |
-| `test_plan_sprint01.md` | 712 | 包括的テスト計画 |
-| `quick_start.md` | 70 | クイックスタート |
-| `servo_control.md` | 140 | サーボ制御仕様 |
+| `build_flash.md` | 357 | ビルド・フラッシュ手順 |
+| `ble_protocol.md` | 308 | BLEプロトコル詳細 |
+| `test_plan_sprint01.md` | 780 | 包括的テスト計画 |
+| `quick_start.md` | 94 | クイックスタート |
+| `servo_control.md` | 165 | サーボ制御仕様 |
 
-**合計**: 9ファイル、3477行
+**合計**: 9ファイル、3468行
 
 **結果**: ✅ **PASS**
 - 配線ガイド: 詳細図解・注意事項・トラブルシューティング

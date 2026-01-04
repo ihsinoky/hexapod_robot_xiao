@@ -69,7 +69,7 @@ Sprint 1の目標である「安全に動かせる最小の操縦体験」が完
 **Status**: COMPLETE
 
 **成果物**:
-- `docs/ble_protocol.md` (320行)
+- `docs/ble_protocol.md` (309行)
 
 **内容**:
 - Service UUID: `12345678-1234-1234-1234-123456789abc`
